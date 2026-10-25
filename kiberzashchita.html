@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>КиберЗащита</title>
+<style>
+:root {
+  --bg:#071018; --fg:#eef4fb; --muted:#93a4b8; --primary:#3d8bfd; --primary-fg:#041018;
+  --ok:#5ee0a0; --bad:#ff8b8b; --line:rgba(61,139,253,.45);
+  --card:rgba(232,242,255,.07); --border:rgba(232,242,255,.14);
+}
+* { box-sizing:border-box; }
+html,body { margin:0; min-height:100%; }
+body {
+  font-family: "Segoe UI", Manrope, system-ui, sans-serif;
+  color:var(--fg); line-height:1.5;
+  background:
+    radial-gradient(900px 420px at 8% -10%, rgba(61,139,253,.22), transparent 60%),
+    linear-gradient(180deg, #071018, #0c1b2c);
+}
+button { font:inherit; color:inherit; cursor:pointer; }
+button:disabled { cursor:default; opacity:.45; }
+.app { width:min(1120px, 100%); margin:0 auto; min-height:100dvh; padding:20px 16px 40px; display:flex; flex-direction:column; gap:18px; }
+header { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; }
+.brand { display:flex; gap:12px; align-items:center; min-width:0; }
+.mark { width:44px; height:44px; border-radius:14px; border:1px solid var(--border); background:var(--card); display:grid; place-items:center; color:var(--primary); flex:none; }
+.brand p { margin:0; }
+.brand .name { color:var(--primary); font-weight:700; }
+.brand .sub { color:var(--muted); font-size:14px; }
+.ghost, .primary { min-height:44px; border-radius:999px; padding:0 16px; font-weight:700; }
+.ghost { background:transparent; border:1px solid var(--border); }
+.primary { background:var(--primary); color:var(--primary-fg); border:0; }
+.screen { display:none; flex:1; }
+.screen.on { display:flex; flex-direction:column; gap:16px; min-height:0; }
+.pick { display:grid; gap:16px; flex:1; }
+.hero, .card, .lesson, .q, .result {
+  background:var(--card); border:1px solid var(--border); border-radius:20px; backdrop-filter:blur(14px);
+}
+.hero { padding:22px; display:flex; flex-direction:column; justify-content:space-between; gap:20px; }
+.kicker { margin:0; color:var(--primary); font-size:13px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; }
+h1 { margin:8px 0 0; font-size:clamp(28px, 4vw, 48px); line-height:1.1; }
+h1 span { display:block; margin-top:8px; color:var(--muted); font-size:clamp(18px, 2vw, 28px); font-weight:650; }
+.lead { color:var(--muted); max-width:36rem; }
+.facts { display:grid; gap:10px; margin:0; padding:0; list-style:none; }
+.facts li { border:1px solid var(--border); border-radius:14px; padding:12px; background:rgba(7,16,24,.45); }
+.facts strong { display:block; }
+.facts span { color:var(--muted); font-size:14px; }
+.ages { display:grid; gap:10px; }
+.age {
+  min-height:112px; text-align:left; padding:16px; border-radius:20px;
+  border:1px solid var(--border); background:var(--card); display:flex; flex-direction:column; justify-content:space-between; gap:10px;
+}
+.age:hover { border-color:var(--line); }
+.age b { display:block; font-size:18px; }
+.age small, .muted { color:var(--muted); }
+.progress { height:8px; background:#071018; border-radius:99px; overflow:hidden; }
+.progress i { display:block; height:100%; background:var(--primary); width:0; }
+.layout { display:grid; gap:14px; }
+.side { display:flex; flex-direction:column; gap:10px; }
+.lesson-btn { width:100%; min-height:56px; text-align:left; display:flex; gap:10px; align-items:center; padding:8px 10px; border-radius:16px; border:1px solid var(--border); background:var(--card); }
+.lesson-btn.active { border-color:var(--line); background:rgba(232,242,255,.12); }
+.num { width:32px; height:32px; border-radius:99px; display:grid; place-items:center; background:#071018; color:var(--muted); flex:none; font-weight:800; }
+.num.done { background:var(--ok); color:#041018; }
+.lesson { padding:18px; }
+.lesson h2 { margin:4px 0 0; font-size:clamp(20px, 3vw, 28px); }
+.lesson ul { padding-left:18px; }
+.lesson li { margin:8px 0; }
+.tip { border-left:3px solid var(--primary); padding-left:12px; color:var(--muted); }
+.row { display:flex; flex-wrap:wrap; gap:10px; }
+.q { padding:16px; }
+.q h3 { margin:0 0 10px; font-size:16px; }
+.opt { width:100%; min-height:48px; text-align:left; margin-top:8px; padding:10px 12px; border-radius:14px; border:1px solid var(--border); background:rgba(7,16,24,.4); }
+.opt.pick { border-color:var(--line); background:rgba(232,242,255,.12); }
+.opt.ok { border-color:var(--ok); background:rgba(94,224,160,.15); }
+.opt.bad { border-color:var(--bad); background:rgba(255,139,139,.15); }
+.result { padding:28px 18px; text-align:center; max-width:640px; margin:0 auto; width:100%; }
+.score { font-size:clamp(48px, 10vw, 72px); font-weight:800; margin:8px 0; }
+@media (min-width: 900px) {
+  .app { padding: 40px 48px 56px; }
+  .pick { max-width: 1100px; margin: 0 auto; width: 100%; gap: 28px; align-content: center; }
+  .ages { grid-template-columns: repeat(4, 1fr); }
+  .facts { grid-template-columns: repeat(3, 1fr); }
+  .layout { grid-template-columns: 280px minmax(0, 1fr); align-items: start; }
+  .age { min-height: 190px; }
+}
+@media (max-width: 799px) {
+  .age small { font-size:14px; }
+  .primary, .ghost { width:100%; }
+  .row .primary, .row .ghost { width:auto; flex:1 1 160px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand">
+      <div class="mark" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z"/></svg>
+      </div>
+      <div>
+        <p class="name">КиберЗащита</p>
+        <p class="sub">Базовые правила безопасности в сети</p>
+      </div>
+    </div>
+    <button class="ghost" id="restart" hidden>С начала</button>
+  </header>
+  <section class="screen on" id="pick"></section>
+  <section class="screen" id="learn"></section>
+  <section class="screen" id="quiz"></section>
+  <section class="screen" id="result"></section>
+</div>
+<script>
+const tracks = [
+  {id:"kids", label:"Дети", range:"до 11 лет", blurb:"Короткие правила простым языком", title:"Для детей до 11 лет",
+   lessons:[
+    {title:"Секретный пароль", short:"Пароль — только твой", points:["Придумай пароль из букв и цифр, который знаешь только ты и родители.","Не используй своё имя или «123456».","Не говори пароль друзьям и незнакомцам в игре.","Если забыл — скажи взрослым, они помогут."], tip:"Пароль как зубная щётка: ей пользуешься только ты."},
+    {title:"Личные сведения", short:"Что нельзя рассказывать", points:["Не пиши адрес дома, школу и номер телефона.","Не отправляй фото, где видно дом или школу.","Если просят имя родителей или карту — сразу скажи взрослым.","Даже в игре лучше взять ник, а не настоящее имя."], tip:"Если не уверен — сначала спроси маму, папу или учителя."},
+    {title:"Незнакомцы", short:"Люди в чате — не друзья сразу", points:["Не соглашайся встречаться с теми, кого знаешь только из интернета.","Не переходи по ссылкам от незнакомцев.","Странные или страшные сообщения покажи взрослым.","Можно заблокировать человека и пожаловаться."], tip:"Настоящие друзья не просят секреты и не пугают."},
+    {title:"Сайты и игры", short:"Куда можно заходить", points:["Открывай только то, что разрешили родители.","Не скачивай игры без разрешения.","Окно «Вы выиграли приз» — закрой и расскажи взрослым.","Рядом с адресом сайта полезно увидеть замочек."], tip:"Лучше лишний раз спросить, чем потом жалеть."}
+   ],
+   quiz:[
+    {q:"Какой пароль лучше?", options:["Имя и год рождения","Буквы и цифры, которые знаешь только ты","123456","Имя героя"], correct:1},
+    {q:"Что нельзя писать незнакомцам?", options:["Любимый цвет","Адрес дома и школу","Название игры","Любимое животное"], correct:1},
+    {q:"Незнакомец зовёт встретиться. Что делать?", options:["Согласиться","Сказать родителям и не идти","Дать телефон","Прислать фото дома"], correct:1},
+    {q:"Появилось окно «Вы выиграли!». Что дальше?", options:["Ввести данные","Закрыть и рассказать взрослым","Переслать друзьям","Скачать файл"], correct:1},
+    {q:"Кому можно говорить пароль?", options:["Лучшему другу","Только родителям, если нужно","Людям в игре","Всем в классе"], correct:1}
+   ]},
+  {id:"teens", label:"Подростки", range:"12–17 лет", blurb:"Соцсети, игры и аккаунты", title:"Для подростков 12–17 лет",
+   lessons:[
+    {title:"Пароли и второй код", short:"Один пароль на всё — плохая идея", points:["Делай длинные разные пароли для важных аккаунтов.","Включай двухфакторную защиту: код из приложения или SMS.","Менеджер паролей удобнее, чем записывать всё в заметки.","Не отправляй пароль в чат «на минутку»."], tip:"Даже если пароль утечёт, без второго кода войти сложнее."},
+    {title:"Фишинг", short:"Поддельные ссылки и срочность", points:["Проверяй адрес сайта перед вводом логина.","«Срочно подтверди аккаунт» и «ты выиграл» — частые уловки.","Не открывай ссылки из странных сообщений.","Если сомневаешься — зайди на сайт через поиск, а не по ссылке."], tip:"Настоящие сервисы редко требуют пароль через случайное сообщение."},
+    {title:"Приватность в соцсетях", short:"Что останется в сети", points:["Закрой профиль и проверь, кто видит фото и геометки.","Не публикуй документы, билеты и «я сейчас дома один».","Подумай, увидят ли это родители, школа или будущая работа.","Удалить пост не значит стереть все копии."], tip:"Цифровой след живёт дольше, чем шутка в сторис."},
+    {title:"Травля и давление", short:"Как отвечать на кибербуллинг", points:["Не отвечай ещё более жёстко — сохрани переписку.","Заблокируй и пожалуйся в приложении.","Расскажи взрослому, которому доверяешь.","Не поддерживай травлю лайком или пересылкой."], tip:"Ты не обязан это терпеть. Помощь есть."},
+    {title:"Загрузки и Wi-Fi", short:"Файлы и чужие сети", points:["Ставь приложения из официальных магазинов.","Не открывай вложения от неизвестных отправителей.","В кафе не вводи пароли и данные карт без защиты.","Обновляй телефон и компьютер: так закрывают дыры."], tip:"Обновление — это не «лишнее», а заплатка от взлома."}
+   ],
+   quiz:[
+    {q:"Зачем второй фактор входа?", options:["Чтобы сайт грузился быстрее","Чтобы украденного пароля было мало для входа","Чтобы не нужен был пароль","Чтобы скрыть город"], correct:1},
+    {q:"Что такое фишинг?", options:["Игра","Обман ради логина и пароля","Настройка приватности","Антивирус"], correct:1},
+    {q:"Подозрительная ссылка в сообщении. Что лучше?", options:["Сразу открыть","Не открывать и зайти на сайт через поиск","Переслать всем","Ввести пароль"], correct:1},
+    {q:"Как реагировать на травлю в сети?", options:["Ответить ещё жёстче","Сохранить доказательства, заблокировать и сказать взрослому","Сразу удалить все аккаунты","Опубликовать адрес обидчика"], correct:1},
+    {q:"Почему опасен открытый Wi-Fi?", options:["Он всегда платный","Данные могут перехватить","Нельзя смотреть видео","Телефон запрещено заряжать"], correct:1},
+    {q:"Что ухудшает приватность?", options:["Закрытый профиль","Геометка «я сейчас здесь»","Отключение меток","Короткий список друзей"], correct:1}
+   ]},
+  {id:"adults", label:"Взрослые", range:"18–55 лет", blurb:"Деньги, работа и устройства", title:"Для взрослых 18–55 лет",
+   lessons:[
+    {title:"Фишинг и давление", short:"Срочность — любимый приём мошенников", points:["Сверяйте домен: похожие буквы и лишние слова в адресе — плохой знак.","«Счёт заблокируют через час» почти всегда манипуляция.","Не переходите по ссылке из письма. Откройте сайт сами.","Код из SMS и пароль по телефону не называйте никому."], tip:"Банк и госуслуги не просят пароль в письме и по звонку."},
+    {title:"Пароли и второй фактор", short:"Уникальный вход на важные сервисы", points:["Храните пароли в менеджере, а не в одном файле «пароли».","Включайте второй фактор: приложение или ключ надёжнее SMS.","Не повторяйте пароль почты на работе, в банке и в магазинах.","Раз в сезон проверьте, не светились ли адреса в утечках."], tip:"Почта — главный ключ: через неё сбрасывают всё остальное."},
+    {title:"Обновления и копии", short:"Защита от вирусов и шифровальщиков", points:["Оставьте автообновления системы и браузера включёнными.","Не откладывайте патчи на рабочем ноутбуке неделями.","Делайте копии важных файлов: облако и отдельный диск.","Правило 3-2-1: три копии, два носителя, одна вне дома."], tip:"Копия данных — единственная надёжная защита от выкупа за файлы."},
+    {title:"Чужой Wi-Fi", short:"Сети в дороге", points:["В открытой сети не вводите банк и рабочую почту без VPN.","Для оплаты надёжнее мобильный интернет.","Выключите автоподключение к открытым сетям.","VPN шифрует трафик от владельца кафе и аэропорта."], tip:"Название сети «Free_Airport» легко подделать."},
+    {title:"Лишние данные", short:"Что отдавать приложениям", points:["Камера, микрофон, контакты и геолокация — только если правда нужны.","Не заполняйте анкеты «на всякий случай».","Раз в год удалите аккаунты и приложения, которыми не пользуетесь.","На старом телефоне перед продажей сотрите данные полностью."], tip:"Чем меньше данных у сервиса, тем меньше ущерб при утечке."}
+   ],
+   quiz:[
+    {q:"Какой признак чаще всего выдаёт фишинг?", options:["Письмо на русском","Срочность и просьба перейти по ссылке","Есть логотип","Письмо короткое"], correct:1},
+    {q:"Что лучше для второго фактора?", options:["Один пароль везде","Приложение-аутентификатор или ключ","Пароль другу","Записка на мониторе"], correct:1},
+    {q:"Какое копирование надёжнее?", options:["Только облако","3-2-1: три копии, два носителя, одна вне дома","Только фото","Автосохранение в редакторе"], correct:1},
+    {q:"Почему рискован банк в публичном Wi-Fi без VPN?", options:["Это всегда незаконно","Трафик могут перехватить","Карта сама заблокируется","Сайт не откроется"], correct:1},
+    {q:"Звонок «из банка»: просят код из SMS. Ваши действия?", options:["Продиктовать код","Положить трубку и позвонить в банк по номеру с карты","Перевести деньги на «безопасный счёт»","Назвать номер карты"], correct:1},
+    {q:"Зачем обновлять систему?", options:["Ради новой иконки","Чтобы закрыть известные дыры","Чтобы вдвое ускорить ПК","Только для игр"], correct:1}
+   ]},
+  {id:"seniors", label:"56+", range:"56 лет и старше", blurb:"Простые правила без спешки", title:"Для людей 56 лет и старше",
+   lessons:[
+    {title:"Звонки «из банка»", short:"Настоящий банк не торопит", points:["Если просят код из SMS, пароль или номер карты — это мошенники.","Положите трубку. Перезвоните сами по номеру на карте или в договоре.","Не переводите деньги на «безопасный счёт». Такого счёта нет.","Родственники не просят срочный перевод через незнакомый номер."], tip:"Спешка — главный признак обмана. Можно всегда положить трубку."},
+    {title:"Сообщения и ссылки", short:"Не нажимайте, если не ждали", points:["Ссылки в SMS про посылки, штрафы и «выигрыш» лучше не открывать.","Если ждёте посылку — зайдите в приложение службы сами.","Не устанавливайте программу, которую прислали в сообщении.","Сомневаетесь — покажите сообщение детям или сотруднику банка в отделении."], tip:"Кнопка в письме может вести не туда, куда написано."},
+    {title:"Пароль и помощник", short:"Как не потерять доступ", points:["Пароль лучше записать в бумажную тетрадь дома, не на холодильнике у двери.","Не используйте дату рождения и «12345».","Доверенный родственник может помочь настроить вход, но пароль банка знаете вы.","Никому по телефону пароль не диктуйте — даже если говорят «мы из поддержки»."], tip:"Поддержка никогда не должна знать ваш пароль."},
+    {title:"Деньги и объявления", short:"Предоплата и «выигрыш»", points:["Не платите аванс незнакомцу за квартиру, лечение или «инвестиции».","Выигрыш, за который сначала просят заплатить, — обман.","Проверяйте продавца: встреча, договор, официальный сайт.","Крупный перевод делайте только после паузы и разговора с близким."], tip:"Если предложение слишком хорошее и очень срочное — это почти всегда ловушка."},
+    {title:"Близкий «в беде»", short:"Срочно нужны деньги — почти всегда обман", points:["Если звонят и говорят, что сын, внук или другой близкий попал в аварию, больницу или полицию и срочно нужны деньги — не переводите сразу.","Положите трубку и сами наберите близкого по номеру, который у вас уже записан. Не по тому, который продиктовали в звонке.","Мошенники давят: «не кладите трубку», «никому не говорите», «счёт уже готов». Это признак обмана.","Настоящий родственник поймёт, если вы сначала проверите. Перевод делайте только после живого разговора с ним."], tip:"Голос в трубке можно подделать. Номер, который вы набрали сами, подделать сложнее."},
+    {title:"Телефон и компьютер", short:"Простые привычки", points:["Соглашайтесь на обновления системы, когда телефон сам их предлагает.","Не давайте «мастеру по телефону» управлять экраном.","Блокировку экрана включите: короткий код или отпечаток.","Важные фото и документы пусть лежат ещё и у близкого человека в копии."], tip:"Никто не должен видеть ваш экран удалённо без вашей ясной просьбы о помощи."}
+   ],
+   quiz:[
+    {q:"Вам звонят и просят код из SMS «для защиты счёта». Что делать?", options:["Назвать код","Положить трубку и позвонить в банк самому","Продиктовать номер карты","Перевести деньги, как сказали"], correct:1},
+    {q:"Пришло SMS «посылка ждёт, оплатите по ссылке». Вы посылку не ждёте. Как поступить?", options:["Открыть ссылку","Не открывать и удалить","Переслать код из SMS","Установить приложение из SMS"], correct:1},
+    {q:"Где разумнее хранить пароль?", options:["В тетради дома, не на виду","На стикере на входной двери","Сказать его любому, кто представится банком","Использовать дату рождения везде"], correct:1},
+    {q:"Вам пишут: вы выиграли приз, но сначала нужно оплатить доставку. Это…", options:["Обычная лотерея","Признак мошенничества","Сообщение банка","Обязательный налог"], correct:1},
+    {q:"Звонят: «ваш близкий в аварии, срочно переведите деньги и никому не говорите». Что делать?", options:["Сразу перевести, пока не стало хуже","Положить трубку и самому позвонить близкому по знакомому номеру","Назвать код из SMS","Не класть трубку, как просят"], correct:1},
+    {q:"Незнакомец предлагает управлять вашим экраном «для ремонта». Ваш ответ?", options:["Разрешить сразу","Отказать и обратиться к знакомому мастеру лично","Назвать пароль от банка","Выключить блокировку навсегда"], correct:1}
+   ]}
+];
+const $ = (id) => document.getElementById(id);
+let age = null, done = new Set(), open = 0, answers = {}, checked = false;
+function track(){ return tracks.find(t => t.id === age); }
+function show(name){ for (const id of ["pick","learn","quiz","result"]) $(id).classList.toggle("on", id===name); $("restart").hidden = name==="pick"; window.scrollTo(0,0); }
+function esc(s){ return s.replace(/[&<>]/g, c => ({"&":"&","<":"<",">":">"}[c])); }
+function renderPick(){
+  $("pick").innerHTML = `<div class="pick"><div><p class="kicker">Шаг 1</p><h1>Сначала возраст.<span>Потом правила, которые вам подходят.</span></h1><p class="lead">Четыре коротких курса. В конце каждого — тест, чтобы проверить, что осталось в памяти.</p></div><div class="ages">${tracks.map(t => `<button class="age" data-age="${t.id}"><span class="muted">${esc(t.range)}</span><span><b>${esc(t.label)}</b><small>${esc(t.blurb)}</small></span></button>`).join("")}</div><ul class="facts"><li><strong>4 возраста</strong><span>от детей до 56+</span></li><li><strong>Короткие уроки</strong><span>по одному правилу</span></li><li><strong>Тест в конце</strong><span>с разбором ответов</span></li></ul></div>`;
+  $("pick").querySelectorAll("[data-age]").forEach(b => b.onclick = () => { age=b.dataset.age; done=new Set(); open=0; answers={}; checked=false; renderLearn(); show("learn"); });
+}
+function renderLearn(){
+  const t = track();
+  const list = t.lessons.map((l,i) => `<button class="lesson-btn ${open===i?"active":""}" data-i="${i}"><span class="num ${done.has(i)?"done":""}">${done.has(i)?"✓":i+1}</span><span><b>${esc(l.title)}</b><br><small class="muted">${esc(l.short)}</small></span></button>`).join("");
+  const l = t.lessons[open];
+  $("learn").innerHTML = `<div><p class="kicker">${esc(t.range)}</p><h1 style="font-size:clamp(26px,4vw,40px)">${esc(t.title)}</h1></div><div class="layout"><aside class="side"><div class="card" style="padding:14px"><div style="display:flex;justify-content:space-between" class="muted"><span>Уроки</span><span>${done.size} / ${t.lessons.length}</span></div><div class="progress"><i style="width:${done.size/t.lessons.length*100}%"></i></div></div>${list}<button class="primary" id="toquiz" ${done.size<t.lessons.length?"disabled":""}>К тесту</button>${done.size<t.lessons.length?'<p class="muted" style="text-align:center;margin:0">Отметьте все уроки, затем откроется тест.</p>':""}</aside><article class="lesson"><p class="kicker">Урок ${open+1}</p><h2>${esc(l.title)}</h2><ul>${l.points.map(p=>`<li>${esc(p)}</li>`).join("")}</ul><p class="tip">${esc(l.tip)}</p><div class="row"><button class="primary" id="next">Запомнил, дальше</button><button class="ghost" id="backage">Другой возраст</button></div></article></div>`;
+  $("learn").querySelectorAll("[data-i]").forEach(b => b.onclick = () => { open=+b.dataset.i; renderLearn(); });
+  $("next").onclick = () => { done.add(open); open=Math.min(open+1, t.lessons.length-1); renderLearn(); };
+  $("backage").onclick = () => { show("pick"); renderPick(); };
+  $("toquiz").onclick = () => { if (done.size<t.lessons.length) return; answers={}; checked=false; renderQuiz(); show("quiz"); };
+}
+function renderQuiz(){
+  const t = track();
+  $("quiz").innerHTML = `<div><p class="kicker">${esc(t.range)}</p><h1 style="font-size:clamp(26px,4vw,40px)">Итоговый тест</h1><p class="lead">Выберите один ответ. После проверки правильные варианты подсветятся.</p></div>` + t.quiz.map((item,qi)=>`<fieldset class="q"><h3>${qi+1}. ${esc(item.q)}</h3>${item.options.map((o,oi)=>{
+    let cls="opt";
+    if (checked && oi===item.correct) cls+=" ok";
+    else if (checked && answers[qi]===oi) cls+=" bad";
+    else if (answers[qi]===oi) cls+=" pick";
+    return `<button class="${cls}" data-q="${qi}" data-o="${oi}" ${checked?"disabled":""}>${esc(o)}</button>`;
+  }).join("")}</fieldset>`).join("") + `<div class="row"><button class="ghost" id="tolessons">К урокам</button>${checked?"":'<button class="primary" id="check">Проверить</button>'}</div>`;
+  $("quiz").querySelectorAll("[data-q]").forEach(b => b.onclick = () => { answers[+b.dataset.q]=+b.dataset.o; renderQuiz(); });
+  $("tolessons").onclick = () => { renderLearn(); show("learn"); };
+  const c = $("check");
+  if (c){
+    c.disabled = Object.keys(answers).length < t.quiz.length;
+    c.onclick = () => { checked=true; renderResult(); show("result"); };
+  }
+}
+function renderResult(){
+  const t = track();
+  const score = t.quiz.reduce((n,q,i)=>n+(answers[i]===q.correct?1:0),0);
+  const p = Math.round(score/t.quiz.length*100);
+  const msg = p>=80?"Правила усвоены уверенно.":p>=50?"Хорошая база. Имеет смысл ещё раз открыть уроки с ошибками.":"Стоит пройти уроки ещё раз — эти привычки реально защищают.";
+  $("result").innerHTML = `<div class="result"><p class="kicker">Результат</p><div class="score">${p}%</div><p class="lead" style="margin:0 auto">${score} из ${t.quiz.length}. ${msg}</p><div class="row" style="justify-content:center;margin-top:18px"><button class="ghost" id="review">Разобрать ответы</button><button class="primary" id="again">Пройти тест снова</button><button class="ghost" id="less">Вернуться к урокам</button></div></div>`;
+  $("review").onclick = () => { renderQuiz(); show("quiz"); };
+  $("again").onclick = () => { answers={}; checked=false; renderQuiz(); show("quiz"); };
+  $("less").onclick = () => { renderLearn(); show("learn"); };
+}
+$("restart").onclick = () => { age=null; show("pick"); renderPick(); };
+renderPick();
+</script>
+</body>
+</html>
