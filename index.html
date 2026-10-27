@@ -105,7 +105,8 @@ h1 span { display:block; margin-top:8px; color:var(--muted); font-size:clamp(18p
     </div>
     <button class="ghost" id="restart" hidden>С начала</button>
   </header>
-  <section class="screen on" id="pick"></section>
+  <section class="screen on" id="intro"></section>
+  <section class="screen" id="pick"></section>
   <section class="screen" id="learn"></section>
   <section class="screen" id="quiz"></section>
   <section class="screen" id="result"></section>
@@ -170,7 +171,7 @@ const tracks = [
    quiz:[
     {q:"Вам звонят и просят код из SMS «для защиты счёта». Что делать?", options:["Назвать код","Положить трубку и позвонить в банк самому","Продиктовать номер карты","Перевести деньги, как сказали"], correct:1},
     {q:"Пришло SMS «посылка ждёт, оплатите по ссылке». Вы посылку не ждёте. Как поступить?", options:["Открыть ссылку","Не открывать и удалить","Переслать код из SMS","Установить приложение из SMS"], correct:1},
-    {q:"Где разумнее хранить пароль?", options:["На стикере на входной двери","В тетради дома, не на виду","Сказать его любому, кто представится банком","Использовать дату рождения везде"], correct:1},
+    {q:"Где разумнее хранить пароль?", options:["В тетради дома, не на виду","На стикере на входной двери","Сказать его любому, кто представится банком","Использовать дату рождения везде"], correct:1},
     {q:"Вам пишут: вы выиграли приз, но сначала нужно оплатить доставку. Это…", options:["Обычная лотерея","Признак мошенничества","Сообщение банка","Обязательный налог"], correct:1},
     {q:"Звонят: «ваш близкий в аварии, срочно переведите деньги и никому не говорите». Что делать?", options:["Сразу перевести, пока не стало хуже","Положить трубку и самому позвонить близкому по знакомому номеру","Назвать код из SMS","Не класть трубку, как просят"], correct:1},
     {q:"Незнакомец предлагает управлять вашим экраном «для ремонта». Ваш ответ?", options:["Разрешить сразу","Отказать и обратиться к знакомому мастеру лично","Назвать пароль от банка","Выключить блокировку навсегда"], correct:1}
@@ -179,7 +180,11 @@ const tracks = [
 const $ = (id) => document.getElementById(id);
 let age = null, done = new Set(), open = 0, answers = {}, checked = false;
 function track(){ return tracks.find(t => t.id === age); }
-function show(name){ for (const id of ["pick","learn","quiz","result"]) $(id).classList.toggle("on", id===name); $("restart").hidden = name==="pick"; window.scrollTo(0,0); }
+function show(name){ for (const id of ["intro","pick","learn","quiz","result"]) $(id).classList.toggle("on", id===name); $("restart").hidden = name==="intro" || name==="pick"; window.scrollTo(0,0); }
+function renderIntro(){
+  $("intro").innerHTML = `<div class="pick" style="max-width:760px"><div><p class="kicker">Как пользоваться</p><h1>Короткий курс безопасности в сети</h1><p class="lead">Сайт учит базовым правилам: пароли, ссылки, звонки мошенников и личные данные. Материал подбирается по возрасту.</p></div><ul class="facts"><li><strong>1. Возраст</strong><span>Выберите свою категорию.</span></li><li><strong>2. Уроки</strong><span>Прочитайте каждый и отметьте его.</span></li><li><strong>3. Тест</strong><span>Проверьте, что запомнили.</span></li></ul><button class="primary" id="gostart" style="width:auto">Начать</button></div>`;
+  $("gostart").onclick = () => { renderPick(); show("pick"); };
+}
 function esc(s){ return s.replace(/[&<>]/g, c => ({"&":"&","<":"<",">":">"}[c])); }
 function renderPick(){
   $("pick").innerHTML = `<div class="pick"><div><p class="kicker">Шаг 1</p><h1>Сначала возраст.<span>Потом правила, которые вам подходят.</span></h1><p class="lead">Четыре коротких курса. В конце каждого — тест, чтобы проверить, что осталось в памяти.</p></div><div class="ages">${tracks.map(t => `<button class="age" data-age="${t.id}"><span class="muted">${esc(t.range)}</span><span><b>${esc(t.label)}</b><small>${esc(t.blurb)}</small></span></button>`).join("")}</div><ul class="facts"><li><strong>4 возраста</strong><span>от детей до 56+</span></li><li><strong>Короткие уроки</strong><span>по одному правилу</span></li><li><strong>Тест в конце</strong><span>с разбором ответов</span></li></ul></div>`;
@@ -222,8 +227,8 @@ function renderResult(){
   $("again").onclick = () => { answers={}; checked=false; renderQuiz(); show("quiz"); };
   $("less").onclick = () => { renderLearn(); show("learn"); };
 }
-$("restart").onclick = () => { age=null; show("pick"); renderPick(); };
-renderPick();
+$("restart").onclick = () => { age=null; renderIntro(); show("intro"); };
+renderIntro();
 </script>
 </body>
 </html>
